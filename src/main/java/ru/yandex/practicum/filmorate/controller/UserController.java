@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
         log.info("Получен запрос POST /users с телом: {}", user);
         validate(user);
         user.setId(getNextId());
@@ -33,7 +36,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User newUser) {
+    public User update(@Valid @RequestBody User newUser) {
         log.info("Получен запрос PUT /users с телом: {}", newUser);
         if (newUser.getId() == 0) {
             log.warn("Валидация не пройдена: не указан id пользователя для обновления");
@@ -46,7 +49,7 @@ public class UserController {
             return newUser;
         }
         log.warn("Валидация не пройдена: пользователь с данным id {} не найден", newUser.getId());
-        throw new ValidationException("Пользователь с id = " + newUser.getId() + " не найден");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с id = " + newUser.getId() + " не найден");
     }
 
     private int getNextId() {
@@ -59,19 +62,7 @@ public class UserController {
     }
 
     private void validate(User user) {
-        if (user.getLogin().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("Валидация не пройдена: некорректный email {}", user.getEmail());
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы");
-        }
-        if (user.getEmail().isBlank() || user.getLogin().contains(" ")) {
-            log.warn("Валидация не пройдена: некорректный логин {}", user.getLogin());
-            throw new ValidationException("Почта не может быть пустой и должна содержать @");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Валидация не пройдена: дата рождения в будущем {}", user.getBirthday());
-            throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
-        if (user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("Имя пользователя пустое, автоматически заменено на логин: {}", user.getLogin());
         }
