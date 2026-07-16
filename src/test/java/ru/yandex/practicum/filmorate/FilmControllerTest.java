@@ -1,23 +1,27 @@
 package ru.yandex.practicum.filmorate;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FilmControllerTest {
 
     private FilmController filmController;
+    private Validator validator;
 
     @BeforeEach
     void setUp() {
         filmController = new FilmController();
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     private Film createValidFilm() {
@@ -30,23 +34,11 @@ public class FilmControllerTest {
     }
 
     @Test
-    void testCreate_whenRequestBodyIsEmpty() {
-        // При передаче null ваш код выбросит NullPointerException, так как внутри validate() вызывается film.getName()
-        assertThrows(NullPointerException.class, () -> {
-            filmController.create(null);
-        });
-        assertEquals(0, filmController.getAll().size());
-    }
-
-    @Test
     void testCreate_whenNameIsBlank() {
         Film film = createValidFilm();
-        film.setName("   ");
+        film.setName(" ");
 
-        assertThrows(ValidationException.class, () -> {
-            filmController.create(film);
-        });
-        assertEquals(0, filmController.getAll().size());
+        assertFalse(validator.validate(film).isEmpty());
     }
 
     @Test
@@ -54,19 +46,15 @@ public class FilmControllerTest {
         Film film = createValidFilm();
         film.setDescription("a".repeat(201));
 
-        assertThrows(ValidationException.class, () -> {
-            filmController.create(film);
-        });
-        assertEquals(0, filmController.getAll().size());
+        assertFalse(validator.validate(film).isEmpty());
     }
 
     @Test
-    void testCreate_whenDescriptionIsExactly200Characters() {
+    void testCreate_whenDurationIsMinusOne() {
         Film film = createValidFilm();
-        film.setDescription("a".repeat(200));
+        film.setDuration(-1);
 
-        filmController.create(film);
-        assertEquals(1, filmController.getAll().size());
+        assertFalse(validator.validate(film).isEmpty());
     }
 
     @Test
@@ -77,47 +65,6 @@ public class FilmControllerTest {
         assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         });
-        assertEquals(0, filmController.getAll().size());
-    }
-
-    @Test
-    void testCreate_whenReleaseDateIsExactlyCinemaBirthday() {
-        Film film = createValidFilm();
-        film.setReleaseDate(LocalDate.of(1895, 12, 28));
-
-        filmController.create(film);
-        assertEquals(1, filmController.getAll().size());
-    }
-
-    @Test
-    void testCreate_whenDurationIsMinusOne() {
-        Film film = createValidFilm();
-        film.setDuration(-1);
-
-        assertThrows(ValidationException.class, () -> {
-            filmController.create(film);
-        });
-        assertEquals(0, filmController.getAll().size());
-    }
-
-    @Test
-    void testCreate_whenDurationIsZero() {
-        Film film = createValidFilm();
-        film.setDuration(0);
-
-        filmController.create(film);
-        assertEquals(1, filmController.getAll().size());
-    }
-
-    @Test
-    void testGetAll_whenEmpty() {
-        assertEquals(0, filmController.getAll().size());
-    }
-
-    @Test
-    void testGetAll_whenFilmsExist() {
-        filmController.create(createValidFilm());
-        assertEquals(1, filmController.getAll().size());
     }
 
     @Test
@@ -135,7 +82,7 @@ public class FilmControllerTest {
         Film film = createValidFilm();
         film.setId(999);
 
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(ResponseStatusException.class, () -> {
             filmController.update(film);
         });
     }

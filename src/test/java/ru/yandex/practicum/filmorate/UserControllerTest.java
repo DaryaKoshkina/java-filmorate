@@ -1,7 +1,10 @@
 package ru.yandex.practicum.filmorate;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -13,10 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UserControllerTest {
 
     private UserController userController;
+    private Validator validator;
 
     @BeforeEach
     void setUp() {
         userController = new UserController();
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     private User createValidUser() {
@@ -39,63 +44,49 @@ public class UserControllerTest {
     @Test
     void testCreate_whenEmailIsEmpty() {
         User user = createValidUser();
-        user.setEmail(""); // пустая почта
+        user.setEmail("");
 
-        assertThrows(ValidationException.class, () -> {
-            userController.create(user);
-        });
-        assertEquals(0, userController.getAll().size());
+        assertFalse(validator.validate(user).isEmpty());
     }
 
     @Test
     void testCreate_whenEmailDoesNotContainAtSign() {
         User user = createValidUser();
-        user.setEmail("yandex.ru"); // нет знака @
+        user.setEmail("yandex.ru");
 
-        assertThrows(ValidationException.class, () -> {
-            userController.create(user);
-        });
-        assertEquals(0, userController.getAll().size());
+        assertFalse(validator.validate(user).isEmpty());
     }
 
     @Test
     void testCreate_whenLoginIsEmpty() {
         User user = createValidUser();
-        user.setLogin(""); // пустой логин
+        user.setLogin("");
 
-        assertThrows(ValidationException.class, () -> {
-            userController.create(user);
-        });
-        assertEquals(0, userController.getAll().size());
+        assertFalse(validator.validate(user).isEmpty());
     }
 
     @Test
     void testCreate_whenLoginContainsSpaces() {
         User user = createValidUser();
-        user.setLogin("yandex user"); // логин с пробелом
+        user.setLogin("yandex user");
 
-        assertThrows(ValidationException.class, () -> {
-            userController.create(user);
-        });
-        assertEquals(0, userController.getAll().size());
+        assertFalse(validator.validate(user).isEmpty());
     }
 
     @Test
     void testCreate_whenBirthdayIsTomorrow() {
         User user = createValidUser();
-        user.setBirthday(LocalDate.now().plusDays(1)); // дата в будущем
+        user.setBirthday(LocalDate.now().plusDays(1));
 
-        assertThrows(ValidationException.class, () -> {
-            userController.create(user);
-        });
-        assertEquals(0, userController.getAll().size());
+        assertFalse(validator.validate(user).isEmpty());
     }
 
     @Test
     void testCreate_whenBirthdayIsToday() {
         User user = createValidUser();
-        user.setBirthday(LocalDate.now()); // граничное значение: сегодня
+        user.setBirthday(LocalDate.now());
 
+        assertTrue(validator.validate(user).isEmpty());
         User created = userController.create(user);
         assertNotNull(created);
         assertEquals(1, userController.getAll().size());
@@ -104,12 +95,12 @@ public class UserControllerTest {
     @Test
     void testCreate_whenNameIsBlank_usesLoginAsName() {
         User user = createValidUser();
-        user.setName("   "); // пустое имя (из пробелов)
+        user.setName(" ");
 
         User created = userController.create(user);
         assertNotNull(created);
         assertEquals(1, userController.getAll().size());
-        assertEquals("yandex_user", created.getName()); // имя должно стать как логин
+        assertEquals("yandex_user", created.getName());
     }
 
     @Test
@@ -138,7 +129,7 @@ public class UserControllerTest {
         User user = createValidUser();
         user.setId(999);
 
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(ResponseStatusException.class, () -> {
             userController.update(user);
         });
     }
