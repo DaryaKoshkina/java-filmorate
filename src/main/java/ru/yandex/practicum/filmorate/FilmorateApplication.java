@@ -13,9 +13,10 @@ import java.util.Map;
 @SpringBootApplication
 @RestControllerAdvice
 public class FilmorateApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(FilmorateApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FilmorateApplication.class, args);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {

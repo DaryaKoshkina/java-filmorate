@@ -1,4 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Email;
@@ -17,7 +18,7 @@ public class User {
     @NotBlank(message = "Почта не может быть пустой")
     @Email(message = "Некорректный формат электронной почты")
 
-    private  String email;
+    private String email;
 
     @NotBlank(message = "Логин не может быть пустым")
     @Pattern(regexp = "^\\S+$", message = "Логин не может содержать пробелы")
