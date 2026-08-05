@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
