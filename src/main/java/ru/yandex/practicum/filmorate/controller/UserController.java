@@ -4,32 +4,42 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import jakarta.validation.Valid;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @GetMapping("/{id}")
+    public User getByID(@PathVariable int id) {
+        log.info("Получен запрос GET /users/{}", id);
+        return userService.getByID(id);
+    }
 
     @GetMapping
     public Collection<User> getAll() {
         log.info("Получен запрос GET /users");
-        return users.values();
+        return userService.getAll();
     }
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Получен запрос POST /users с телом: {}", user);
-        validate(user);
-        user.setId(getNextId());
-        users.put(user.getId(), user);
+        userService.create(user);
         log.info("Пользователь успешно добавлен с ID: {}", user.getId());
         return user;
     }
@@ -37,33 +47,30 @@ public class UserController {
     @PutMapping
     public User update(@Valid @RequestBody User newUser) {
         log.info("Получен запрос PUT /users с телом: {}", newUser);
-        if (newUser.getId() == 0) {
-            log.warn("Валидация не пройдена: не указан id пользователя для обновления");
-            throw new ValidationException("id должен быть указан");
-        }
-        if (users.containsKey(newUser.getId())) {
-            validate(newUser);
-            users.put(newUser.getId(), newUser);
-            log.info("Пользователь с ID успешно обновлен: {}", newUser.getId());
-            return newUser;
-        }
-        log.warn("Валидация не пройдена: пользователь с данным id {} не найден", newUser.getId());
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с id = " + newUser.getId() + " не найден");
+        return userService.update(newUser);
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос PUT /users/{}/friends/{}", id, friendId);
+        userService.addFriend(id, friendId);
     }
 
-    private void validate(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.info("Имя пользователя пустое, автоматически заменено на логин: {}", user.getLogin());
-        }
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+        log.info("Получен запрос DELETE /users/{}/friends/{}", id, friendId);
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable int id) {
+        log.info("Получен запрос GET /users/{}/friends", id);
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        log.info("Получен запрос GET /users/{}/friends/common/{}", id, otherId);
+        return userService.getCommonFriends(id, otherId);
     }
 }

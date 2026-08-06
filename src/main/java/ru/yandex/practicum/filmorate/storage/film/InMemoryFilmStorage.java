@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -44,7 +46,15 @@ public class InMemoryFilmStorage implements FilmStorage {
             return newFilm;
         }
         log.warn("Валидация не пройдена: фильм с данным id {} не найден", newFilm.getId());
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильм с id = " + newFilm.getId() + " не найден");
+        throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
+    }
+
+    @Override
+    public Film getById(int id) {
+        if (!films.containsKey(id)) {
+            throw new NotFoundException("Фильм с id = " + id + " не найден");
+        }
+        return films.get(id);
     }
 
     private int getNextId() {

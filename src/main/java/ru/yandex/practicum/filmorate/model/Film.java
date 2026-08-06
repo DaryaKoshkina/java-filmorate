@@ -6,9 +6,10 @@ import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -25,4 +26,6 @@ public class Film {
 
     @PositiveOrZero(message = "Продолжительность фильма должна быть положительным числом.")
     private int duration;
+
+    private final Set<Integer> likes = new HashSet<>();
 }
