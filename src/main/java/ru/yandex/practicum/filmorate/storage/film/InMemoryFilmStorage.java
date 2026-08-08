@@ -1,13 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -18,8 +15,8 @@ import java.util.Map;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final Map<Integer, Film> films = new HashMap<>();
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @Override
     public Collection<Film> getAll() {

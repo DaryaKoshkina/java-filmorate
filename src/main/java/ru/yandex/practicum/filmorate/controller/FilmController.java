@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import jakarta.validation.Valid;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -38,16 +37,15 @@ public class FilmController {
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.info("Получен запрос POST /films с телом: {}", film);
-        filmService.create(film);
-        log.info("Фильм успешно добавлен с ID: {}", film.getId());
-        return film;
+        Film createdFilm = filmService.create(film);
+        log.info("Фильм успешно добавлен с ID: {}", createdFilm.getId());
+        return createdFilm;
     }
 
     @PutMapping
     public Film update(@Valid @RequestBody Film newFilm) {
         log.info("Получен запрос PUT /films с телом: {}", newFilm);
-        filmService.update(newFilm);
-        return newFilm;
+        return filmService.update(newFilm);
     }
 
     @PutMapping("/{id}/like/{userId}")
