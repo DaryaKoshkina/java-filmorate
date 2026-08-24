@@ -14,7 +14,7 @@
 4. От **films** к **likes** - у одного фильма может быть много лайков.
 5. От **users** к **likes** - один пользователь может поставить много лайков.
 6. От **users** к **friends** (отправитель) - один пользователь может отправить много заявок в друзья.
-7. От **users** к **friends** (получатель) - одному пользователю может прийти many заявок в друзья.
+7. От **users** к **friends** (получатель) - одному пользователю может прийти много заявок в друзья.
 
 ## Описание таблиц
 * **films** и **users** - основные таблицы с данными
@@ -35,7 +35,7 @@ JOIN mpa_ratings m ON f.mpa_rating_id = m.id;
 SELECT f.name, COUNT(l.user_id) AS rate
 FROM films f
 LEFT JOIN likes l ON f.id = l.film_id
-GROUP BY f.id
+GROUP BY f.id, f.name 
 ORDER BY rate DESC
 LIMIT 10;
 ```

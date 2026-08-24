@@ -17,7 +17,7 @@ public class FilmController {
 
     private final FilmService filmService;
 
-    @Autowired // Внедрение через конструктор
+    @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
     }

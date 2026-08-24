@@ -20,12 +20,12 @@ public class FilmControllerTest {
     }
 
     private Film createValidFilm() {
-        Film film = new Film();
-        film.setName("Человек павук");
-        film.setDescription("Фильм о мальчике, который смог.");
-        film.setReleaseDate(LocalDate.of(2002, 5, 3));
-        film.setDuration(121);
-        return film;
+        return Film.builder()
+                .name("Человек павук")
+                .description("Фильм о мальчике, который смог.")
+                .releaseDate(LocalDate.of(2002, 5, 3))
+                .duration(121)
+                .build();
     }
 
     @Test
