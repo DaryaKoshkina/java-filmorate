@@ -20,12 +20,12 @@ public class UserControllerTest {
     }
 
     private User createValidUser() {
-        User user = new User();
-        user.setEmail("spider-man@gmail.com");
-        user.setLogin("spider");
-        user.setName("Питер Паркер");
-        user.setBirthday(LocalDate.of(2001, 8, 10));
-        return user;
+        return User.builder()
+                .email("spider-man@gmail.com")
+                .login("spider")
+                .name("Питер Паркер")
+                .birthday(LocalDate.of(2001, 8, 10))
+                .build();
     }
 
     @Test
@@ -53,7 +53,6 @@ public class UserControllerTest {
     void testCreate_whenLoginContainsSpaces() {
         User user = createValidUser();
         user.setLogin("spider man");
-        // Если у вас стоит кастомная валидация или регулярное выражение против пробелов
         assertFalse(validator.validate(user).isEmpty(), "Логин не должен содержать пробелы");
     }
 
